@@ -1,0 +1,55 @@
+#! /usr/bin/python3
+
+'''
+Convert the load duration of each scenario
+taken from many rally reports to a table.
+
+Usage:
+    rally-reports-to-csv PATH-TO-RALLY-REPORT-JSON ...
+
+Take many rally JSON reports in a folder structure like:
+    $version/$run/output.json
+    The paths taken must include $version and $run components.
+    The JSON report can be named arbitrarily.
+
+Example folder structure:
+    reports/pike/1/output.json
+    reports/pike/2/output.json
+    reports/pike/3/output.json
+    reports/queens/1/output.json
+    ...
+
+Produce a whitespace separated table on stdout like:
+    scenario version run load_duration iterations
+    ...
+
+Examples:
+    rally-reports-to-csv $( find rally/reports/ -type f -name '*.json' )
+'''
+
+import os
+import sys
+import re
+
+import json
+
+file_paths = sys.argv[1:]
+
+for p in file_paths:
+    h, _ = os.path.split(p)
+    h, run_count = os.path.split(h)
+    _, version = os.path.split(h)
+    with open(p, 'r') as f:
+        rally_report = json.load(f)
+        for task in rally_report['tasks']:
+            for subtask in task['subtasks']:
+                for workload in subtask['workloads']:
+                    scenario = list(workload['scenario'].keys())[0]
+                    print(
+                        scenario,
+                        version,
+                        run_count,
+                        workload['load_duration'],
+                        workload['statistics'][
+                            'durations']['total']['data']['iteration_count'],
+                    )

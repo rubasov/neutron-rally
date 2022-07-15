@@ -1,0 +1,19 @@
+ip=$( cat ~/.ssh/config | grep -A1 "^Host ${1:?}$" | awk '/HostName/ { print $2 }' )
+if [ "$ip" = "" ]
+then
+    echo >&2 error: no ip found for host: $1
+    return
+fi
+
+export OS_AUTH_TYPE=password
+export OS_AUTH_URL=http://${ip:?}/identity
+export OS_CACERT=
+export OS_IDENTITY_API_VERSION=3
+export OS_PASSWORD=devstack
+export OS_PROJECT_DOMAIN_ID=default
+export OS_PROJECT_NAME=admin
+export OS_REGION_NAME=RegionOne
+export OS_TENANT_NAME=admin
+export OS_USER_DOMAIN_ID=default
+export OS_USERNAME=admin
+export OS_VOLUME_API_VERSION=3

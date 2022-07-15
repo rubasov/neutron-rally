@@ -1,0 +1,18 @@
+branch           ubuntu  python  devstack  neutron
+stable/yoga      22.04   3.10.4  6f545e25  9f9a0cfb6f
+stable/xena      20.04   3.8.10  41c19b27  1aec28fd96
+stable/wallaby   20.04   3.8.10  d6382fbe  949942c51c
+stable/victoria  20.04   3.8.10  f610e170  a9b28d471b
+stable/ussuri    18.04   3.6.9   b0b08560  aec98a8fbe
+stable/train     18.04   3.6.9   83624972  7740ed0784
+stable/stein     18.04   3.6.9   c67e7d3b  7d6bde20ce
+stable/rocky     16.04   2.7.12  7f1025e   9c009ec
+stable/queens    16.04   2.7.12  4da98ee   2946609
+stable/pike      16.04   2.7.12  a0fab74   0579045
+
+$ python3 -m pip freeze | egrep rally
+rally==3.3.0
+rally-openstack==2.2.0
+
+neutron version for rally-jobs/task-neutron.yaml:
+20.0.0.0rc1-385-ga9912caf3f

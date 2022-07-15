@@ -1,0 +1,64 @@
+#! /usr/bin/python3
+
+'''
+Plot the output produced by rally-reports-to-csv.
+
+Usage:
+    rally-reports-to-csv ... | plot-rally-csv OUTPUT-FILE
+
+Description:
+    Take the output produced by rally-reports-to-csv on stdin.
+
+    Average the runtimes for each run,
+    then produce an image file (for example .png)
+    with a subplot for each scenario in the input.
+    The subplots share the version axis.
+
+    The output format is driven by the extension of the OUTPUT-FILE argument.
+    Supported formats are defined by matplotlib's savefig().
+
+Examples:
+    rally-reports-to-csv $( find rally/reports/ -type f -name '*.json' ) |
+    plot-rally-csv load_duration.png
+
+Dependencies:
+    python3 -m pip install matplotlib
+'''
+
+from collections import defaultdict
+import re
+import sys
+
+import matplotlib.pyplot as plt
+
+out = sys.argv[1]
+
+# { 'scenarioA': {'versionA': [duration1, duration2, ...], ...} ... }
+runtimes_raw = defaultdict(lambda: defaultdict(list))
+
+# { 'scenarioA': {'versionA': avg_duration, ...} ... }
+runtimes_avg = defaultdict(lambda: defaultdict(int))
+
+scenario_iterations = {}
+
+for line in sys.stdin:
+    scenario, version, run, duration, iterations, _ = re.split('\s+', line)
+    runtimes_raw[scenario][version].append(float(duration))
+    # assuming iterations is always the same for the same scenario
+    scenario_iterations[scenario] = iterations
+
+for scenario, v in runtimes_raw.items():
+    for version, durations in v.items():
+        runtimes_avg[scenario][version] = sum(durations) / len(durations)
+
+fig, axs = plt.subplots(len(runtimes_avg.keys()), sharex=True)
+fig.set_figwidth(12)
+fig.set_figheight(50)
+
+for i, (scenario, durations) in enumerate(runtimes_avg.items()):
+    axs[i].set_title('%s (%sx)' % (scenario, scenario_iterations[scenario]))
+    axs[i].plot(durations.keys(), durations.values())
+
+fig.supylabel('time (s)')
+fig.tight_layout()
+plt.savefig(out)
